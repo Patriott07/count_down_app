@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link rel="stylesheet" href="tailwind-full.css">
+</head>
+
+<body class="flex flex-col h-screen items-center justify-center min-h-screen bg-white">
+    <div class="text-4xl font-bold mb-4" id="countdown">1:30</div>
+
+    <select id="mode" class="mb-4 p-2 border rounded">
+        <option value="manual">Manual</option>
+        <option value="auto">Auto</option>
+    </select>
+
+    <div class="flex">
+
+        <button id="start" class="px-4 py-2 bg-blue-500 text-white rounded-lg m-2">Start</button>
+        <button id="reset" class="px-4 py-2 bg-red-500 text-white rounded-lg m-2">Reset</button>
+    </div>
+
+    <audio id="alarm-sound" src="./audio/alarm-clock-90867.mp3"></audio>
+    <audio id="tut-sound" src="./audio/54321-35890.mp3"></audio>
+    <audio loop="true" id="bg-sound" src="./audio/countdown-beep-104007.mp3"></audio>
+    <audio id="start-sound" src="./audio/correct-2-46134.mp3"></audio>
+
+    <script>
+        let countdownElement = document.getElementById("countdown");
+        let startButton = document.getElementById("start");
+        let resetButton = document.getElementById("reset");
+        let alarmSound = document.getElementById("alarm-sound");
+        let tutSound = document.getElementById("tut-sound");
+        let bgSound = document.getElementById("bg-sound");
+        let startSound = document.getElementById("start-sound");
+
+        let modeSelect = document.getElementById("mode");
+
+        let countdown;
+
+        // set time here
+        let timeLeft = 90;
+        let autoMode = false;
+
+        function updateCountdown() {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            countdownElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+        function startCountdown() {
+            if (countdown) return;
+            startSound.play();
+            // bgSound.play();
+
+            countdown = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateCountdown();
+                    if (timeLeft < 11 && timeLeft > 0) {
+                        bgSound.pause();
+                        tutSound.play();
+                    }
+                } else {
+                    clearInterval(countdown);
+                    countdown = null;
+                    alarmSound.play();
+
+                    if (autoMode) {
+                        setTimeout(() => {
+                            resetCountdown();
+                            startCountdown();
+                        }, 3000);
+                    } else {
+                        setTimeout(() => {
+                            resetCountdown();
+                            // startCountdown();
+                        }, 3000);
+                    }
+                }
+            }, 1000);
+        }
+
+        function resetCountdown() {
+            startSound.pause();
+            bgSound.pause();
+            tutSound.pause();
+            alarmSound.pause();
+            clearInterval(countdown);
+            countdown = null;
+            timeLeft = 90;
+            updateCountdown();
+        }
+
+        modeSelect.addEventListener("change", () => {
+            autoMode = modeSelect.value === "auto";
+        });
+
+        document.addEventListener("keydown", (e) => {
+            if (e.keyCode == 32) { // spasi
+                // resetCountdown();
+                // startCountdown();
+
+                setTimeout(() => {
+                    resetCountdown();
+                    startCountdown();
+                }, 1000);
+            }
+        })
+        startButton.addEventListener("click", startCountdown);
+        resetButton.addEventListener("click", resetCountdown);
+    </script>
+</body>
+
+</html>
